@@ -40,7 +40,7 @@ void loop() {
   Serial.println(dhtUmid);
   send_data();
   Serial.println("Going to sleep.");
-  ESP.deepSleep(60e6);
+  ESP.deepSleep(60e6*10);
 }
 void readData(void){
   dhtTemp = dht.readTemperature();
