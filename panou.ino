@@ -13,9 +13,6 @@
 #define DEBUG
 #define ONE_WIRE_BUS 8
 #define TEMPERATURE_PRECISION 12
-#define CALIBFACT 5.5
-#define DEBIT1PIN 2
-#define DEBIT2PIN 3
 
 DHT dht(DHTPIN, DHTTYPE);
 OneWire oneWire(ONE_WIRE_BUS);
@@ -51,14 +48,6 @@ float t[DEVICES+1];
 
 long previousMillis = 0;        // will store last time values were read
 long interval = 10000;           // interval at which to read (milliseconds)
-unsigned long totalDebit=0;
-
-volatile int mainPulseCount; //measuring the rising edges of the signal for the main line
-volatile int secPulseCount;  //measuring the rising edges of the signal for the secondary line
-unsigned int copyMainPulseCount;
-unsigned int copySecPulseCount;
-unsigned long totalMain=0;
-unsigned long totalSec=0;
 
 void setup() {
   #ifdef DEBUG
@@ -99,23 +88,11 @@ void setup() {
   sensors.setResolution(t10, TEMPERATURE_PRECISION);
   sensors.setResolution(t11, TEMPERATURE_PRECISION);
   sensors.setResolution(t12, TEMPERATURE_PRECISION);
-
-  pinMode(DEBIT1PIN, INPUT);
-  pinMode(DEBIT2PIN, INPUT);
-  attachInterrupt(digitalPinToInterrupt(DEBIT1PIN), mainRPM, RISING); //attaching main pulse counter interrupt to pin 2
-  attachInterrupt(digitalPinToInterrupt(DEBIT2PIN), secRPM, RISING);  //attaching secondary pulse counter interrupt to pin 3
 }
 void loop() {
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval) {
     previousMillis = currentMillis;
-    getCount();
-    
-    double mainFlowRead = (copyMainPulseCount / CALIBFACT); 
-    double secFlowRead = (copySecPulseCount / CALIBFACT);
-    totalMain+=mainFlowRead/60*1000;
-    totalSec+=secFlowRead/60*1000;
-    
     readData();
     #ifdef DEBUG
     printData();
@@ -209,14 +186,6 @@ void send_data(){
       client.print("a5");
       client.print("=");
       client.print(analogRead(A5));
-      client.print("&&");
-      client.print("debit1");
-      client.print("=");
-      client.print(totalMain);
-      client.print("&&");
-      client.print("debit2");
-      client.print("=");
-      client.print(totalSec);
       client.println( " HTTP/1.1");
       client.print( "Host: " );
       client.println(server);
@@ -224,7 +193,6 @@ void send_data(){
       client.println();
       client.println();
       client.stop();
-      totalMain=0;totalSec=0;
     }
     else {
       // you didn't get a connection to the server:
@@ -257,26 +225,6 @@ void readData(void){
   dhtHumd  = dht.readHumidity();
 }
 
-void mainRPM ()     //This is the function that the interupt calls
-{
-  mainPulseCount++;  //This function measures the rising and falling edge of the hall effect sensors signal
-}
-
-void secRPM ()     //This is the function that the interupt calls
-{
-  secPulseCount++;  //This function measures the rising and falling edge of the hall effect sensors signal
-}
-
-void getCount()
-{
-  noInterrupts();
-  copyMainPulseCount = mainPulseCount;
-  mainPulseCount = 0;
-  copySecPulseCount = secPulseCount;
-  secPulseCount = 0;
-  interrupts();
-}
-
 #ifdef DEBUG
 void printData(void){
   for(int i=0;i<=DEVICES;i++){
@@ -285,10 +233,6 @@ void printData(void){
   }
   Serial.print("U:");
   Serial.print(dhtHumd);
-  Serial.print(" D1:");
-  Serial.print(totalMain);
-  Serial.print(" D2:");
-  Serial.print(totalSec);
   Serial.print(" ");
   for(int i=0;i<RELAYS;i++)
     if(relayState[i]==true)Serial.print("1");
