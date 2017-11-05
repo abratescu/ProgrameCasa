@@ -179,13 +179,19 @@ void send_data(){
       client.print("=");
       client.print(analogRead(A3));
       client.print("&&");
+      double a = analogRead(A4)*0.02854-4.0976;
+      int a4=(int)(a*1000);
+      int rawValue=analogRead(A5);
+      double b=0.04218*rawValue-25.65;
+      if(b<0)b=0;
+      int a5=(int)(b*1000);
       client.print("a4");
       client.print("=");
-      client.print(analogRead(A4));
+      client.print(a4);
       client.print("&&");
       client.print("a5");
       client.print("=");
-      client.print(analogRead(A5));
+      client.print(a5);
       client.println( " HTTP/1.1");
       client.print( "Host: " );
       client.println(server);
@@ -237,7 +243,33 @@ void printData(void){
   for(int i=0;i<RELAYS;i++)
     if(relayState[i]==true)Serial.print("1");
     else Serial.print("0");
-  Serial.println("");
+  Serial.print("    ");
+  int a0=analogRead(A0);
+  Serial.print(" A0=");
+  Serial.print(a0);
+  int a1=analogRead(A1);
+  Serial.print(" A1=");
+  Serial.print(a1);
+  int a2=analogRead(A2);
+  Serial.print(" A2=");
+  Serial.print(a2);
+  int a3=analogRead(A3);
+  Serial.print(" A3=");
+  Serial.print(a3);
+  int a4=analogRead(A4);
+  Serial.print(" A4=");
+  Serial.print(a4);
+  int a5=analogRead(A5);
+  Serial.print(" A5=");
+  Serial.print(a5);
+  double a = analogRead(A4)*0.02854-4.0976;
+  Serial.print(" A4=");
+  Serial.print((int)(a*1000));
+  int rawValue=analogRead(A5);
+  double b=0.04218*rawValue-25.65;
+  Serial.print(" A5=");
+  if(b<0)b=0;
+  Serial.println((int)(b*1000));
 }
 void printConfig(void){
   Serial.println("PLEASE CHECK!!!\nConfiguration(panou):");
