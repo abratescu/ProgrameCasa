@@ -2,6 +2,7 @@
 #include <EthernetUdp.h>
 #define RELAYS 8
 #define DEBUG
+#include <avr/wdt.h>
 EthernetClient client;
 byte mac[] ={0x90, 0xA2, 0xDA, 0x0f, 0x25, 0xE7};
 IPAddress ip(192, 168, 2, 205);
@@ -14,6 +15,7 @@ bool relayState[RELAYS];
 int pinRelay[RELAYS];
 
 void setup() {
+  wdt_enable(WDTO_8S);// setat la 8 secunde
   #ifdef DEBUG
   Serial.begin(9600);
   #endif
@@ -54,6 +56,7 @@ void loop() {
     send_data();
   }
   memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
+   wdt_reset();
 }
 void setRelays(String datReq){
   int i=5;
