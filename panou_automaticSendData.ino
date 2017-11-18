@@ -5,6 +5,7 @@
 #include <EthernetUdp.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
+#include <avr/wdt.h>
 
 #define DHTPIN 7
 #define DHTTYPE DHT22
@@ -47,7 +48,7 @@ float dhtHumd;
 float t[DEVICES+1];
 
 long previousMillis = 0;        // will store last time values were read
-long interval = 10000*6*7;           // interval at which to read (milliseconds)
+long interval = 60000*7;           // interval at which to read (milliseconds)
 
 void setup() {
   #ifdef DEBUG
@@ -57,6 +58,7 @@ void setup() {
   Udp.begin(port);
   dht.begin();
   sensors.begin();
+  wdt_enable(WDTO_8S);// setat la 8 secunde 
   
   delay(1500);
   while (!Serial);
@@ -116,6 +118,7 @@ void loop() {
      }
   }
   if(packetSize)memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
+  wdt_reset();
 }
 void setRelays(String datReq){
   int i=5;
