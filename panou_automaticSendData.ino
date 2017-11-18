@@ -48,7 +48,7 @@ float dhtHumd;
 float t[DEVICES+1];
 
 long previousMillis = 0;        // will store last time values were read
-long interval = 10000*6*7;           // interval at which to read (milliseconds)
+long interval = 60000*7;           // interval at which to read (milliseconds)
 
 void setup() {
   #ifdef DEBUG
